@@ -32,7 +32,6 @@
             font-size: 20px;
             line-height: 30px;
             width: 50%;
-
         }
 
         #verse a {
@@ -55,6 +54,12 @@
         .background--complex {
             color: gray;
             mix-blend-mode: luminosity;
+        }
+
+        @media screen and (max-width: 480px) {
+            #verse {
+                width: 80%;
+            }
         }
     </style>
 </head>
@@ -127,6 +132,7 @@
               },
               success: function( data ) {
                   verseDB = [];
+
 
                   $.each( data, function( key, val ) {
                       verseDB.push( val.text + " ");
