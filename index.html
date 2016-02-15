@@ -1,0 +1,151 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>BeautiVerse - Beautiful Bible Verses</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Libre+Baskerville:400,700' rel='stylesheet' type='text/css'>
+
+    <style>
+        body {
+            background-image: url();
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+        }
+
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #verse {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-family: 'Libre Baskerville', serif;
+            font-weight: bold;
+            font-size: 20px;
+            line-height: 30px;
+            width: 50%;
+
+        }
+
+        #verse a {
+            color: inherit;
+            clear: both;
+            font-size: 10px;
+            display: block;
+        }
+
+        .background--dark {
+            color: #eee;
+            mix-blend-mode: luminosity;
+        }
+
+        .background--light {
+            color: #111;
+            mix-blend-mode: luminosity;
+        }
+
+        .background--complex {
+            color: gray;
+            mix-blend-mode: luminosity;
+        }
+    </style>
+</head>
+<body class="background" data-src="https://source.unsplash.com/category/nature/">
+    <div id="container">
+        <div id="verse" class="target">
+            Loading...
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+    <script src="http://cdn.rawgit.com/kennethcachia/Background-Check/master/background-check.min.js"></script>
+    <script>
+    function convertImageToDataURI(img) {
+        var canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        return canvas.toDataURL('image/png');
+    }
+
+    function isRetina(){
+        return ((window.matchMedia && (window.matchMedia('only screen and (min-resolution: 192dpi), only screen and (min-resolution: 2dppx), only screen and (min-resolution: 75.6dpcm)').matches || window.matchMedia('only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (-o-min-device-pixel-ratio: 2/1), only screen and (min--moz-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2)').matches)) || (window.devicePixelRatio && window.devicePixelRatio >= 2)) && /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
+    }
+
+    $( document ).ready(function() {
+
+        // Load Background Image
+        var img = new Image();
+        img.setAttribute('crossorigin', '');
+
+        var background = $('body');
+
+        var imageWidth = window.screen.width;
+        var imageHeight = window.screen.height;
+
+        if (isRetina){
+            imageWidth *= 2;
+            imageHeight *= 2;
+        }
+
+        var dataSrc = background.attr('data-src') + imageWidth + "x" + imageHeight;
+
+        img.onload = function () {
+          var data = convertImageToDataURI(img);
+
+          var theUrl = "url(" + data + ")";
+
+          background.css("background-image", theUrl);
+
+          // Prepare BackgroundCheck
+          BackgroundCheck.init({
+            targets: '.target',
+            images: background
+          });
+
+          // Load Verses
+          var access_token = 'k19fZdNy0MTqS75IeAK6D8oyke5cIarnJKJ2xs8P';
+
+          $.ajax( {
+              url: 'http://labs.bible.org/api/?passage=random&type=json',
+              type: 'GET',
+              crossDomain: true,
+              dataType: 'jsonp',
+              // data: {q: 'Psalm+91', version: 'eng-NLT'},
+              beforeSend : function( xhr ) {
+                  xhr.setRequestHeader( "Authorization", "Basic " + access_token + ":X");
+              },
+              success: function( data ) {
+                  verseDB = [];
+
+                  $.each( data, function( key, val ) {
+                      verseDB.push( val.text + " ");
+                  });
+
+                  $('#verse').html(verseDB);
+              }
+          });
+
+        };
+
+        img.src = dataSrc;
+
+        $('body').click(function() {
+            location.reload();
+        });
+    });
+
+
+    </script>
+</body>
+</html>
