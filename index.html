@@ -4,24 +4,39 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    
-	<title>BeautiVerse - Beautiful Bible Verses</title>
+
+	<title>BeautiVerse</title>
 
     <link href='https://fonts.googleapis.com/css?family=Libre+Baskerville:400,700' rel='stylesheet' type='text/css'>
 
     <style>
-        body {
-            background-image: url();
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-        }
+
+		body {
+			margin: 0;
+			padding: 0;
+		}
 
         #container {
-            position: relative;
-            width: 100%;
-            height: 100%;
+			position: relative;
+		    overflow: hidden;
+			width: 100%;
+			height: 100%;
+			background-size: cover;
+			background-position: center center;
+			background-repeat: no-repeat;
+			z-index: 0;
         }
+
+		#overlay {
+			background-color: #fff;
+		    opacity: 0.3;
+			z-index: 1;
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+		}
 
         #verse {
             position: absolute;
@@ -30,18 +45,22 @@
             transform: translate(-50%, -50%);
             text-align: center;
             font-family: 'Libre Baskerville', serif;
-            font-weight: bold;
             font-size: 20px;
             line-height: 30px;
             width: 50%;
+			z-index: 2;
         }
 
-        #verse a {
+        #verse .num {
             color: inherit;
             clear: both;
             font-size: 10px;
             display: block;
         }
+
+		#overlay.background--dark {
+			background-color: #000;
+		}
 
         .background--dark {
             color: #eee;
@@ -53,11 +72,6 @@
             mix-blend-mode: luminosity;
         }
 
-        .background--complex {
-            color: gray;
-            mix-blend-mode: luminosity;
-        }
-
         @media screen and (max-width: 480px) {
             #verse {
                 width: 80%;
@@ -65,8 +79,9 @@
         }
     </style>
 </head>
-<body class="background" data-src="https://source.unsplash.com/category/nature/">
-    <div id="container">
+<body>
+    <div id="container" class="background" data-src="https://source.unsplash.com/category/nature/">
+		<div id="overlay" class="target"></div>
         <div id="verse" class="target">
             Loading...
         </div>
@@ -95,12 +110,12 @@
         var img = new Image();
         img.setAttribute('crossorigin', '');
 
-        var background = $('body');
+        var background = $('.background');
 
         var imageWidth = window.screen.width;
         var imageHeight = window.screen.height;
 
-        if (isRetina){
+        if (isRetina()){
             imageWidth *= 2;
             imageHeight *= 2;
         }
@@ -114,35 +129,41 @@
 
           background.css("background-image", theUrl);
 
-          // Prepare BackgroundCheck
-          BackgroundCheck.init({
-            targets: '.target',
-            images: background
-          });
-
           // Load Verses
-          var access_token = 'k19fZdNy0MTqS75IeAK6D8oyke5cIarnJKJ2xs8P';
+          //var access_token = 'k19fZdNy0MTqS75IeAK6D8oyke5cIarnJKJ2xs8P';
+
+		  var randomVerse = Math.floor(Math.random() * 17);
 
           $.ajax( {
-              url: 'http://labs.bible.org/api/?passage=random&type=json',
+			  url: 'http://getbible.net/json',
+			  //url: 'http://labs.bible.org/api/?passage=Psalm+91:1&type=json',
               type: 'GET',
-              crossDomain: true,
               dataType: 'jsonp',
-              // data: {q: 'Psalm+91', version: 'eng-NLT'},
-              beforeSend : function( xhr ) {
-                  xhr.setRequestHeader( "Authorization", "Basic " + access_token + ":X");
-              },
+			  data: 'p=Psa 91:' + randomVerse + '&v=nasb',
+			  jsonp: 'getbible',
               success: function( data ) {
-                  verseDB = [];
+				  console.log(data);
 
+				  var output = '';
+				  var verse_number = '';
 
-                  $.each( data, function( key, val ) {
-                      verseDB.push( val.text + " ");
-                  });
+				  jQuery.each(data.book, function(index, value) {
+					jQuery.each(value.chapter, function(index, value) {
+					    output += value.verse;
+						verse_number = value.verse_nr;
+					});
+					output += '<br><span class="num">' + value.book_name+' '+value.chapter_nr + ':' + verse_number + '</span>';
+            	  });
 
-                  $('#verse').html(verseDB);
+	              $('#verse').html(output);
               }
           });
+
+		  // Prepare BackgroundCheck
+		  BackgroundCheck.init({
+			targets: '.target',
+			images: background
+		  });
 
         };
 
