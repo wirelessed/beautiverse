@@ -14,6 +14,7 @@
 		body {
 			margin: 0;
 			padding: 0;
+			cursor: pointer;
 		}
 
         #container {
@@ -104,6 +105,36 @@
         return ((window.matchMedia && (window.matchMedia('only screen and (min-resolution: 192dpi), only screen and (min-resolution: 2dppx), only screen and (min-resolution: 75.6dpcm)').matches || window.matchMedia('only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (-o-min-device-pixel-ratio: 2/1), only screen and (min--moz-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2)').matches)) || (window.devicePixelRatio && window.devicePixelRatio >= 2)) && /(iPad|iPhone|iPod)/g.test(navigator.userAgent);
     }
 
+	function loadVerses(){
+
+		var randomVerse = Math.floor(Math.random() * 17);
+
+		$.ajax( {
+		  url: 'http://getbible.net/json',
+		  //url: 'http://labs.bible.org/api/?passage=Psalm+91:1&type=json',
+		  type: 'GET',
+		  dataType: 'jsonp',
+		  data: 'p=Psa 91:' + randomVerse + '&v=nasb',
+		  jsonp: 'getbible',
+		  success: function( data ) {
+			  console.log(data);
+
+			  var output = '';
+			  var verse_number = '';
+
+			  jQuery.each(data.book, function(index, value) {
+				jQuery.each(value.chapter, function(index, value) {
+				    output += value.verse;
+					verse_number = value.verse_nr;
+				});
+				output += '<br><span class="num">' + value.book_name+' '+value.chapter_nr + ':' + verse_number + '</span>';
+			  });
+
+		      $('#verse').html(output);
+		  }
+		});
+	}
+
     $( document ).ready(function() {
 
         // Load Background Image
@@ -130,34 +161,7 @@
           background.css("background-image", theUrl);
 
           // Load Verses
-          //var access_token = 'k19fZdNy0MTqS75IeAK6D8oyke5cIarnJKJ2xs8P';
-
-		  var randomVerse = Math.floor(Math.random() * 17);
-
-          $.ajax( {
-			  url: 'http://getbible.net/json',
-			  //url: 'http://labs.bible.org/api/?passage=Psalm+91:1&type=json',
-              type: 'GET',
-              dataType: 'jsonp',
-			  data: 'p=Psa 91:' + randomVerse + '&v=nasb',
-			  jsonp: 'getbible',
-              success: function( data ) {
-				  console.log(data);
-
-				  var output = '';
-				  var verse_number = '';
-
-				  jQuery.each(data.book, function(index, value) {
-					jQuery.each(value.chapter, function(index, value) {
-					    output += value.verse;
-						verse_number = value.verse_nr;
-					});
-					output += '<br><span class="num">' + value.book_name+' '+value.chapter_nr + ':' + verse_number + '</span>';
-            	  });
-
-	              $('#verse').html(output);
-              }
-          });
+		  loadVerses();
 
 		  // Prepare BackgroundCheck
 		  BackgroundCheck.init({
@@ -175,9 +179,13 @@
 
         img.src = dataSrc;
 
-        $('body').click(function() {
+        $('#overlay').on('click', function() {
             location.reload();
         });
+
+		$('#verse').on('click', function() {
+			loadVerses();
+		});
     });
 
 
