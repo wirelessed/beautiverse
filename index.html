@@ -167,10 +167,10 @@
 
 		  if($('#overlay').hasClass('background--dark')){
 			  $('#verse').addClass('background--dark');
-		  } else {
+		  } else if($('#overlay').hasClass('background--light')) {
 			  $('#verse').addClass('background--light');
 		  }
-		  
+
         };
 
         img.src = dataSrc;
